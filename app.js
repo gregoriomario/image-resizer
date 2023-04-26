@@ -6,7 +6,10 @@ import fs from "fs";
 
 const argv = yargs(hideBin(process.argv)).argv;
 const cwd = process.cwd();
-const fileName = argv.f || argv.file;
+const fileName = process.argv[2] || argv.f || argv.file;
+let outputName = String(argv.output || fileName).split(".");
+if (outputName.length > 1 && -1) outputName.slice(0, -1);
+outputName = outputName.join(".");
 
 if (!fileName) {
 	console.log("Specify File Path!");
@@ -19,13 +22,10 @@ const fileBuffer = fs.readFileSync(fullPath);
 
 sharp(fileBuffer)
 	.webp()
-	.toFile(
-		`${String(fileName).split(".").slice(0, -1).join(".")}.webp`,
-		(err, info) => {
-			if (err) {
-				console.log("Error converting file");
-				process.exit(1);
-			}
-			console.log("Converting Image to WEBP success!");
+	.toFile(`${outputName}.webp`, (err, info) => {
+		if (err) {
+			console.log("Error converting file");
+			process.exit(1);
 		}
-	);
+		console.log("Converting Image to WEBP success!");
+	});
