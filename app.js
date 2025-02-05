@@ -22,7 +22,7 @@ if (!fullInputPath) {
 	process.exit(1);
 }
 
-function processFile(filePath, isFile, opts = {}) {
+async function processFile(filePath, isFile, opts = {}) {
 	try {
 		if (!/\.(jpg|jpeg|png)$/i.test(filePath)) return;
 
@@ -38,39 +38,42 @@ function processFile(filePath, isFile, opts = {}) {
 	}
 }
 
-function processDirectory(fullInputPath) {
+async function processDirectory(fullInputPath) {
 	const files = fs.readdirSync(fullInputPath, { encoding: 'utf8' });
 	const destDir = path.join(fullInputPath, 'COMPRESSED');
 	if (!fs.existsSync(destDir)) fs.mkdirSync(destDir);
 
-	files.forEach((fileName, i) => {
-		const filePath = path.join(fullInputPath, fileName);
+	let current = 0;
 
-		if (fs.statSync(filePath).isFile()) {
-			try {
-				processFile(filePath, null, {
-					dest: destDir,
-					index: i + 1,
-				});
-			} catch (err) {
-				console.log(err);
-			}
+
+	await Promise.all(
+		files.map(async (fileName, i) => {
+			const filePath = path.join(fullInputPath, fileName);
+
+			if (!fs.statSync(filePath).isFile()) return;
+			await processFile(filePath, false, {
+				dest: destDir,
+				index: i + 1,
+			});
+		})
+	)
+}
+
+async function main() {
+	if (fs.existsSync(fullInputPath)) {
+		const stats = fs.statSync(fullInputPath);
+		if (stats.isFile()) {
+			await processFile(fullInputPath, true);
+		} else if (stats.isDirectory()) {
+			await processDirectory(fullInputPath);
+		} else {
+			console.error('Invalid file or directory path!');
 		}
-	});
-}
-
-if (fs.existsSync(fullInputPath)) {
-	const stats = fs.statSync(fullInputPath);
-	if (stats.isFile()) {
-		processFile(fullInputPath, true);
-	} else if (stats.isDirectory()) {
-		processDirectory(fullInputPath);
 	} else {
-		console.error('Invalid file or directory path!');
+		console.error('File or directory does not exist!');
 	}
-} else {
-	console.error('File or directory does not exist!');
 }
+await main();
 // const full = argv.full;
 // const jpg = argv.jpg || argv.jpeg;
 // const type = argv.type ?? 'avif';

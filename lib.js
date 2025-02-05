@@ -43,10 +43,8 @@ export async function resizeImage({ filePath, dest, full, type, name, index }) {
 	}
 
 	item.toFile(fileName, (err, info) => {
-		if (err) {
-			console.log('Error converting file');
-		}
-		console.log('Compressing file success!');
+		if (err) return console.log('Error converting file');
+		return console.log('File converted successfully');
 	});
 }
 
