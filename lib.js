@@ -2,7 +2,7 @@ import path from 'path';
 import fs from 'fs';
 import sharp from 'sharp';
 
-export async function turnToWebp({ filePath, dest, full, type, name, index }) {
+export async function resizeImage({ filePath, dest, full, type, name, index }) {
 	const { fileName, file } = getOutputAndFile({
 		filePath,
 		dest,
@@ -12,8 +12,6 @@ export async function turnToWebp({ filePath, dest, full, type, name, index }) {
 	});
 
 	const imageAspect = {
-		// portrait: { width: 1080 },
-		// landscape: { width: 1920 },
 		portrait: { height: 2048 },
 		landscape: { width: 2048 },
 	};
